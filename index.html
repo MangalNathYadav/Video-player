@@ -55,6 +55,10 @@
           <svg viewBox="0 0 24 24" style="width:16px;height:16px;margin-right:6px;"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
           Bulk Import
         </button>
+        <button id="show-speed-btn-side" class="btn-ghost btn-sm btn-full" style="margin-top: 8px;">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;margin-right:6px;fill:#4f9eff;"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.28-10.43zm-9.04 4.5l6.43-8.54L10 10.42a2.33 2.33 0 0 0-.42-.09 2.5 2.5 0 0 0-2.25 2.5 2.5 2.5 0 0 0 2.5 2.5c1.07 0 1.97-.68 2.3-1.62.2.06.4.1.61.12.11.02.21.03.32.03.11 0 .21-.01.32-.03z"/></svg>
+          Speed Controls
+        </button>
       </div>
 
       <!-- Bulk Import Modal -->
@@ -247,15 +251,25 @@ Video Title 2"></textarea>
     </main>
   </div>
 
-  <!-- Bookmarklet Instruction Modal -->
+  <!-- Speed Hacker & Controls Modal -->
   <div id="bookmarklet-modal" class="modal-overlay" hidden>
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Mobile Speed Hacker</h3>
+        <h3>Speed Controls & Hacker</h3>
         <button id="close-bk-btn" class="icon-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="help-text">Since mobile browsers don't support extensions, you can use this **Bookmarklet** to change speed on *any* video, including Spotlightr.</p>
+        <div class="speed-modal-section">
+          <label>Set Native Speed:</label>
+          <div class="speed-custom" style="border:none; padding:10px 0;">
+            <input id="custom-speed-modal" type="number" step="0.1" min="0.1" max="16" value="1" placeholder="Ex: 2.5" />
+            <button id="set-custom-speed-modal">Apply</button>
+          </div>
+        </div>
+        
+        <div class="dl-divider"></div>
+        
+        <p class="help-text"><strong>Mobile Speed Hacker (For Spotlightr):</strong><br>Since mobile browsers block code injection into foreign videos, follow these steps:</p>
         <div class="bk-step">
           <strong>1. Copy this code:</strong>
           <code id="bk-code" style="display:block; padding:10px; background:var(--bg); border:1px solid var(--glass-border); font-size:11px; margin:10px 0; border-radius:4px; word-break:break-all;">javascript:(function(){const s=prompt('Playback Speed?','2');if(s){const v=document.querySelector('video');if(v){v.playbackRate=parseFloat(s);alert('Speed set to '+s+'x');}else{alert('No video found on this page.');}}})();</code>

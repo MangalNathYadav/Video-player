@@ -93,6 +93,9 @@ const dom = {
   doneBkBtn:       $('done-bk-btn'),
   customSpeed:     $('custom-speed'),
   setCustomSpeed:  $('set-custom-speed'),
+  customSpeedModal: $('custom-speed-modal'),
+  setCustomSpeedModal: $('set-custom-speed-modal'),
+  showSpeedBtnSide: $('show-speed-btn-side'),
   npLink:          $('np-link'),
   toast:           $('toast'),
 };
@@ -908,5 +911,14 @@ dom.showBkModal.addEventListener('click', () => {
 
 dom.closeBkBtn.addEventListener('click', () => dom.bkModal.setAttribute('hidden', ''));
 dom.doneBkBtn.addEventListener('click', () => dom.bkModal.setAttribute('hidden', ''));
+
+dom.showSpeedBtnSide.addEventListener('click', () => {
+  dom.bkModal.removeAttribute('hidden');
+});
+
+dom.setCustomSpeedModal.addEventListener('click', () => {
+  setSpeed(dom.customSpeedModal.value);
+  dom.bkModal.setAttribute('hidden', '');
+});
 
 init();
