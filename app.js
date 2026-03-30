@@ -87,6 +87,13 @@ const dom = {
   showBulkBtn:     $('show-bulk-btn'),
   closeBulkBtn:    $('close-bulk-btn'),
   importBtn:       $('import-btn'),
+  bkModal:          $('bookmarklet-modal'),
+  showBkModal:     $('show-bk-modal'),
+  closeBkBtn:      $('close-bk-btn'),
+  doneBkBtn:       $('done-bk-btn'),
+  customSpeed:     $('custom-speed'),
+  setCustomSpeed:  $('set-custom-speed'),
+  npLink:          $('np-link'),
   toast:           $('toast'),
 };
 
@@ -552,6 +559,27 @@ function updateVolumeUI() {
   dom.volSlider.value = muted ? 0 : dom.video.volume;
 }
 
+function setSpeed(v) {
+  v = parseFloat(v);
+  if (isNaN(v)) return;
+  dom.video.playbackRate = v;
+  dom.speedBtn.textContent = v + '×';
+  dom.speedMenu.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('active', parseFloat(b.dataset.speed) === v);
+  });
+  showToast(`Speed: ${v}×`);
+}
+
+dom.setCustomSpeed.addEventListener('click', () => {
+  setSpeed(dom.customSpeed.value);
+  dom.speedMenu.setAttribute('hidden', '');
+});
+
+dom.customSpeed.addEventListener('keydown', e => {
+  if (e.key === 'Enter') dom.setCustomSpeed.click();
+});
+
+
 /* ─── Controls: Speed ────────────────────────────────────────────── */
 dom.speedBtn.addEventListener('click', e => {
   e.stopPropagation();
@@ -559,15 +587,10 @@ dom.speedBtn.addEventListener('click', e => {
   hideDownloadMenu();
 });
 
-dom.speedMenu.querySelectorAll('button').forEach(btn => {
+dom.speedMenu.querySelectorAll('button[data-speed]').forEach(btn => {
   btn.addEventListener('click', () => {
-    const speed = parseFloat(btn.dataset.speed);
-    dom.video.playbackRate = speed;
-    dom.speedBtn.textContent = speed + '×';
-    dom.speedMenu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    setSpeed(btn.dataset.speed);
     dom.speedMenu.setAttribute('hidden', '');
-    showToast(`Speed: ${speed}×`);
   });
 });
 
@@ -622,6 +645,10 @@ document.addEventListener('keydown', e => {
     case 'f': case 'F': dom.fsBtn.click(); break;
     case 'n': case 'N': dom.nextBtn.click(); break;
     case 'p': case 'P': dom.prevBtn.click(); break;
+    // Speed extensions like (shift + . and shift + ,)
+    case '>': setSpeed(dom.video.playbackRate + 0.25); break;
+    case '<': setSpeed(Math.max(0.25, dom.video.playbackRate - 0.25)); break;
+    case 'r': case 'R': setSpeed(1); break;
   }
 });
 
@@ -632,6 +659,13 @@ function updateNowPlaying(title, type) {
   const badge = typeBadge(type);
   dom.npType.textContent = badge.label;
   dom.npType.className = 'np-type-badge ' + badge.cls;
+  
+  if (currentVideoMeta && currentVideoMeta.srcUrl) {
+    dom.npLink.href = currentVideoMeta.srcUrl;
+    dom.npLink.style.display = 'flex';
+  } else {
+    dom.npLink.style.display = 'none';
+  }
 }
 
 /* ─── Download ────────────────────────────────────────────────────── */
@@ -865,5 +899,14 @@ function init() {
   console.log('%cVideoVault loaded!', 'color:#7c5cfc;font-size:16px;font-weight:bold;');
   console.log('%cPlaylist items:', 'color:#4f9eff;', playlist.length);
 }
+
+/* ─── Mobile Speed Hacker Helper ─────────────────────────────────── */
+dom.showBkModal.addEventListener('click', () => {
+  dom.bkModal.removeAttribute('hidden');
+  dom.speedMenu.setAttribute('hidden', '');
+});
+
+dom.closeBkBtn.addEventListener('click', () => dom.bkModal.setAttribute('hidden', ''));
+dom.doneBkBtn.addEventListener('click', () => dom.bkModal.setAttribute('hidden', ''));
 
 init();

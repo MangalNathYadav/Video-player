@@ -190,6 +190,12 @@ Video Title 2"></textarea>
                     <button data-speed="1.5">1.5×</button>
                     <button data-speed="1.75">1.75×</button>
                     <button data-speed="2">2×</button>
+                    <div class="dl-divider"></div>
+                    <div class="speed-custom">
+                      <input id="custom-speed" type="number" step="0.1" min="0.1" max="16" value="1" placeholder="Custom" />
+                      <button id="set-custom-speed">Set</button>
+                    </div>
+                    <button id="show-bk-modal" class="btn-ghost btn-xs btn-full" style="padding:6px; margin-top:4px;">Mobile Speed Extension Help</button>
                   </div>
                 </div>
 
@@ -232,9 +238,34 @@ Video Title 2"></textarea>
           <div class="np-label">Now Playing</div>
           <div id="np-title" class="np-title">—</div>
           <div id="np-type" class="np-type-badge">MP4</div>
+          <a id="np-link" class="np-link" target="_blank" title="Open source video directly for mobile extension support">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            Open Source
+          </a>
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- Bookmarklet Instruction Modal -->
+  <div id="bookmarklet-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Mobile Speed Hacker</h3>
+        <button id="close-bk-btn" class="icon-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="help-text">Since mobile browsers don't support extensions, you can use this **Bookmarklet** to change speed on *any* video, including Spotlightr.</p>
+        <div class="bk-step">
+          <strong>1. Copy this code:</strong>
+          <code id="bk-code" style="display:block; padding:10px; background:var(--bg); border:1px solid var(--glass-border); font-size:11px; margin:10px 0; border-radius:4px; word-break:break-all;">javascript:(function(){const s=prompt('Playback Speed?','2');if(s){const v=document.querySelector('video');if(v){v.playbackRate=parseFloat(s);alert('Speed set to '+s+'x');}else{alert('No video found on this page.');}}})();</code>
+        </div>
+        <p class="help-text"><strong>2.</strong> Add any page to your bookmarks and edit it.<br><strong>3.</strong> Change the URL of the bookmark to the code above.<br><strong>4.</strong> Click "Open Source" on any Spotlightr video here, then run your bookmark!</p>
+      </div>
+      <div class="modal-footer">
+        <button id="done-bk-btn" class="btn-primary">Got it!</button>
+      </div>
+    </div>
   </div>
 
   <!-- Recording status toast -->

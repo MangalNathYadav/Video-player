@@ -928,6 +928,50 @@ input[type="url"]:focus, input[type="text"]:focus {
   .controls-right .ctrl-btn { padding: 4px; }
   .controls-right .ctrl-btn svg { width: 18px; height: 18px; }
 }
+
+.speed-custom {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-top: 1px solid var(--glass-border);
+}
+.speed-custom input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.speed-custom button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.np-link {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent2);
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.np-link:hover {
+  background: var(--glass-border);
+  transform: translateY(-1px);
+}
 /* ─── Bulk & Modals ────────────────────────────────────────────────── */
 .btn-full { width: 100%; justify-content: center; }
 
