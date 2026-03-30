@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VideoVault — Playlist Player</title>
+  <meta name="description" content="A powerful video playlist player supporting MP4, HLS streams, and Spotlightr lecture URLs with download support." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- HLS.js for HLS stream playback -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Sidebar ─────────────────────────────────────────────── -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">VideoVault</span>
+        </div>
+        <button id="sidebar-toggle" class="icon-btn" title="Toggle sidebar" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+      </div>
+
+      <!-- Add URL -->
+      <div class="add-url-panel">
+        <div class="panel-label">Add Video</div>
+        <div class="url-input-row">
+          <input
+            id="url-input"
+            type="url"
+            placeholder="Paste video URL or Spotlightr link…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <div class="title-input-row">
+          <input
+            id="title-input"
+            type="text"
+            placeholder="Title (optional)"
+            autocomplete="off"
+          />
+        </div>
+        <button id="add-btn" class="btn-primary" aria-label="Add video to playlist">
+          <svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Add to Playlist
+        </button>
+        <button id="show-bulk-btn" class="btn-ghost btn-sm btn-full" style="margin-top: 8px;">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;margin-right:6px;"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg>
+          Bulk Import
+        </button>
+      </div>
+
+      <!-- Bulk Import Modal -->
+      <div id="bulk-modal" class="modal-overlay" hidden>
+        <div class="modal-content bulk-content">
+          <div class="modal-header">
+            <h3>Bulk Import Videos</h3>
+            <button id="close-bulk-btn" class="icon-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="help-text">Paste your list below. Each video should have a URL followed by its title on the next line.</p>
+            <textarea id="bulk-input" placeholder="https://...
+Video Title 1
+https://...
+Video Title 2"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button id="import-btn" class="btn-primary">Import All</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playlist -->
+      <div class="playlist-header">
+        <span class="panel-label">Playlist</span>
+        <span id="playlist-count" class="playlist-count">0 videos</span>
+      </div>
+      <div id="playlist" class="playlist" role="list">
+        <div class="empty-state" id="empty-state">
+          <span>🎬</span>
+          <p>No videos yet.<br/>Add a URL above to get started.</p>
+        </div>
+      </div>
+
+      <!-- Playlist actions -->
+      <div class="playlist-actions">
+        <button id="clear-btn" class="btn-ghost btn-sm" aria-label="Clear playlist">Clear All</button>
+        <button id="shuffle-btn" class="btn-ghost btn-sm" aria-label="Shuffle playlist">Shuffle</button>
+      </div>
+    </aside>
+
+    <!-- ── Main Player ──────────────────────────────────────────── -->
+    <main id="main" class="main">
+
+      <!-- Video wrapper -->
+      <div id="player-wrap" class="player-wrap">
+        <div class="player-container" id="player-container">
+          <!-- Idle / no video screen -->
+          <div id="idle-screen" class="idle-screen">
+            <div class="idle-icon">▶</div>
+            <h2>Nothing playing yet</h2>
+            <p>Add a video URL to the playlist and click play</p>
+          </div>
+
+          <!-- The actual video element -->
+          <video id="video" preload="metadata"></video>
+          
+          <!-- Iframe embed for DRM protected videos like Spotlightr -->
+          <iframe id="iframe-player" class="iframe-player hidden-el" style="display:none" allowfullscreen allow="autoplay; fullscreen"></iframe>
+
+          <!-- Loading spinner -->
+          <div id="loading-overlay" class="loading-overlay" hidden>
+            <div class="spinner"></div>
+          </div>
+
+          <!-- Error overlay (hidden by default) -->
+          <div id="error-overlay" class="error-overlay hidden-el" style="display:none">
+            <span class="error-icon">⚠</span>
+            <p id="error-msg">Could not load video.</p>
+            <button class="btn-primary" onclick="app.retryLoad()">Retry</button>
+          </div>
+
+          <!-- Big play/pause overlay on click -->
+          <div id="big-play-overlay" class="big-play-overlay" hidden>
+            <div id="big-play-icon" class="big-play-icon">▶</div>
+          </div>
+
+          <!-- Custom Controls -->
+          <div id="controls" class="controls" role="group" aria-label="Video controls">
+
+            <!-- Progress bar -->
+            <div class="progress-wrap" id="progress-wrap" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+              <div class="progress-bg">
+                <div class="progress-buffered" id="progress-buffered"></div>
+                <div class="progress-fill" id="progress-fill"></div>
+                <div class="progress-thumb" id="progress-thumb"></div>
+              </div>
+              <div class="time-tooltip" id="time-tooltip">0:00</div>
+            </div>
+
+            <!-- Bottom controls row -->
+            <div class="controls-row">
+              <!-- Left group -->
+              <div class="controls-left">
+                <button id="prev-btn" class="ctrl-btn" title="Previous" aria-label="Previous video">
+                  <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                </button>
+                <button id="play-btn" class="ctrl-btn ctrl-play" title="Play/Pause" aria-label="Play or pause">
+                  <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <svg id="pause-icon" viewBox="0 0 24 24" hidden><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <button id="next-btn" class="ctrl-btn" title="Next" aria-label="Next video">
+                  <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+
+                <!-- Volume -->
+                <div class="volume-wrap">
+                  <button id="mute-btn" class="ctrl-btn" title="Mute/Unmute" aria-label="Toggle mute">
+                    <svg id="vol-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    <svg id="mute-icon" viewBox="0 0 24 24" hidden><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z"/></svg>
+                  </button>
+                  <input id="vol-slider" type="range" min="0" max="1" step="0.02" value="1" class="vol-slider" aria-label="Volume" />
+                </div>
+
+                <!-- Time display -->
+                <span class="time-display">
+                  <span id="current-time">0:00</span>
+                  <span class="time-sep"> / </span>
+                  <span id="duration">0:00</span>
+                </span>
+              </div>
+
+              <!-- Right group -->
+              <div class="controls-right">
+                <!-- Speed -->
+                <div class="speed-wrap">
+                  <button id="speed-btn" class="ctrl-btn speed-btn" title="Playback speed" aria-label="Change playback speed">1×</button>
+                  <div id="speed-menu" class="speed-menu" hidden>
+                    <button data-speed="0.5">0.5×</button>
+                    <button data-speed="0.75">0.75×</button>
+                    <button data-speed="1" class="active">1×</button>
+                    <button data-speed="1.25">1.25×</button>
+                    <button data-speed="1.5">1.5×</button>
+                    <button data-speed="1.75">1.75×</button>
+                    <button data-speed="2">2×</button>
+                  </div>
+                </div>
+
+                <!-- Download -->
+                <div class="download-wrap">
+                  <button id="download-btn" class="ctrl-btn" title="Download video" aria-label="Download video">
+                    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                  </button>
+                  <div id="download-menu" class="download-menu" hidden>
+                    <div class="download-menu-title">Download Options</div>
+                    <button id="dl-direct" class="dl-option">
+                      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                      Download File
+                    </button>
+                    <button id="dl-record" class="dl-option">
+                      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+                      Record Stream
+                    </button>
+                    <div class="dl-divider"></div>
+                    <div class="dl-cmd-wrap" id="dl-cmd-wrap">
+                      <div class="dl-cmd-label">Or use yt-dlp / ffmpeg:</div>
+                      <code id="dl-cmd" class="dl-cmd"></code>
+                      <button id="dl-copy-cmd" class="btn-ghost btn-xs">Copy Command</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fullscreen -->
+                <button id="fs-btn" class="ctrl-btn" title="Fullscreen" aria-label="Toggle fullscreen">
+                  <svg id="fs-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                  <svg id="fs-exit-icon" viewBox="0 0 24 24" hidden><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Now playing info -->
+        <div id="now-playing" class="now-playing" hidden>
+          <div class="np-label">Now Playing</div>
+          <div id="np-title" class="np-title">—</div>
+          <div id="np-type" class="np-type-badge">MP4</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Recording status toast -->
+  <div id="rec-toast" class="rec-toast" hidden>
+    <span class="rec-dot"></span>
+    <span id="rec-label">Recording… <span id="rec-size">0 KB</span></span>
+    <button id="rec-stop" class="btn-ghost btn-xs">Stop & Save</button>
+  </div>
+
+  <!-- Generic toast -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
