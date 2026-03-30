@@ -1034,6 +1034,26 @@ input[type="url"]:focus, input[type="text"]:focus {
   color: var(--accent2);
 }
 
+.ext-slider-wrap {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.ext-speed-ui:hover .ext-slider-wrap,
+.ext-speed-ui:focus-within .ext-slider-wrap {
+  width: 100px;
+  margin: 0 8px;
+}
+
+#ext-speed-slider {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .ext-speed-ui .ext-res {
   font-size: 14px;
   margin-left: 4px;

@@ -100,6 +100,7 @@ const dom = {
   extSpeedPlus:    $('ext-speed-plus'),
   extSpeedReset:   $('ext-speed-reset'),
   extSpeedDisplay: $('ext-speed-display'),
+  extSpeedSlider:  $('ext-speed-slider'),
   npLink:          $('np-link'),
   toast:           $('toast'),
 };
@@ -571,10 +572,19 @@ function updateVolumeUI() {
 function setSpeed(v) {
   v = parseFloat(v);
   if (isNaN(v)) return;
-  v = parseFloat(v.toFixed(2));
+  v = Math.min(16, Math.max(0.1, parseFloat(v.toFixed(2))));
+  
+  // If iframe is playing, we can't change speed directly due to browser security
+  if (dom.video.style.display === 'none') {
+    showToast('Secure Video: Use "Open Source" + Bookmarklet Hack for Speed');
+    return;
+  }
+
   dom.video.playbackRate = v;
   dom.speedBtn.textContent = v + '×';
   dom.extSpeedDisplay.textContent = v + 'x';
+  dom.extSpeedSlider.value = v;
+  
   dom.speedMenu.querySelectorAll('button').forEach(b => {
     b.classList.toggle('active', parseFloat(b.dataset.speed) === v);
   });
@@ -932,5 +942,9 @@ dom.setCustomSpeedModal.addEventListener('click', () => {
 dom.extSpeedMinus.addEventListener('click', () => setSpeed(dom.video.playbackRate - 0.25));
 dom.extSpeedPlus.addEventListener('click', () => setSpeed(dom.video.playbackRate + 0.25));
 dom.extSpeedReset.addEventListener('click', () => setSpeed(1));
+
+dom.extSpeedSlider.addEventListener('input', () => {
+  setSpeed(dom.extSpeedSlider.value);
+});
 
 init();
