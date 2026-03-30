@@ -972,6 +972,74 @@ input[type="url"]:focus, input[type="text"]:focus {
   background: var(--glass-border);
   transform: translateY(-1px);
 }
+
+/* ─── External Speed UI ───────────────────────────────────────────── */
+.ext-speed-ui {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 18, 20, 0.75);
+  backdrop-filter: blur(12px);
+  padding: 6px 12px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  user-select: none;
+  font-family: 'Outfit', sans-serif;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  transition: opacity 0.3s ease;
+  pointer-events: auto;
+}
+
+/* Hide when idle */
+.player-container:not(.video-loaded) .ext-speed-ui {
+  display: none;
+}
+
+.ext-speed-ui button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ext-speed-ui button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.15);
+}
+
+.ext-speed-ui button:active {
+  transform: scale(0.95);
+}
+
+#ext-speed-display {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 42px;
+  text-align: center;
+  letter-spacing: -0.02em;
+  color: var(--accent2);
+}
+
+.ext-speed-ui .ext-res {
+  font-size: 14px;
+  margin-left: 4px;
+  color: rgba(255,255,255,0.6);
+}
+
 /* ─── Bulk & Modals ────────────────────────────────────────────────── */
 .btn-full { width: 100%; justify-content: center; }
 

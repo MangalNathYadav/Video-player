@@ -96,6 +96,10 @@ const dom = {
   customSpeedModal: $('custom-speed-modal'),
   setCustomSpeedModal: $('set-custom-speed-modal'),
   showSpeedBtnSide: $('show-speed-btn-side'),
+  extSpeedMinus:   $('ext-speed-minus'),
+  extSpeedPlus:    $('ext-speed-plus'),
+  extSpeedReset:   $('ext-speed-reset'),
+  extSpeedDisplay: $('ext-speed-display'),
   npLink:          $('np-link'),
   toast:           $('toast'),
 };
@@ -317,6 +321,7 @@ function stopPlayer() {
   dom.loadingOverlay.setAttribute('hidden', '');
   
   // reset UI
+  dom.playerContainer.classList.remove('video-loaded');
   dom.idleScreen.style.display = 'flex';
   dom.bigPlayOverlay.setAttribute('hidden', '');
   $('now-playing').setAttribute('hidden', '');
@@ -336,6 +341,7 @@ async function loadAndPlay(index) {
   stopRecording();
 
   const item = playlist[index];
+  dom.playerContainer.classList.add('video-loaded');
   dom.idleScreen.style.display = 'none';
   hideError();
   isLoadingIntentional = true;
@@ -565,8 +571,10 @@ function updateVolumeUI() {
 function setSpeed(v) {
   v = parseFloat(v);
   if (isNaN(v)) return;
+  v = parseFloat(v.toFixed(2));
   dom.video.playbackRate = v;
   dom.speedBtn.textContent = v + '×';
+  dom.extSpeedDisplay.textContent = v + 'x';
   dom.speedMenu.querySelectorAll('button').forEach(b => {
     b.classList.toggle('active', parseFloat(b.dataset.speed) === v);
   });
@@ -920,5 +928,9 @@ dom.setCustomSpeedModal.addEventListener('click', () => {
   setSpeed(dom.customSpeedModal.value);
   dom.bkModal.setAttribute('hidden', '');
 });
+
+dom.extSpeedMinus.addEventListener('click', () => setSpeed(dom.video.playbackRate - 0.25));
+dom.extSpeedPlus.addEventListener('click', () => setSpeed(dom.video.playbackRate + 0.25));
+dom.extSpeedReset.addEventListener('click', () => setSpeed(1));
 
 init();
